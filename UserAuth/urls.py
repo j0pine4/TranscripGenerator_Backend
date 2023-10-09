@@ -7,4 +7,5 @@ app_name = 'UserAuth'
 
 urlpatterns = [
     path('create/', views.CreateUserView.as_view(), name='create'),
+    path('portal/', views.createUserPortalView.as_view(), name='portal'),
 ]

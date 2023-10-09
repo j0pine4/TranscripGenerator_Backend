@@ -18,7 +18,12 @@ class TranscriptBuilderViewset(APIView):
         video_id = kwargs["video_id"]
         transcript = services.getVideoTranscript(video_id)
 
-        return Response(transcript)
+        data = {
+            'transcript': transcript,
+            'tokenCount': services.countTokens(transcript)
+        }
+
+        return Response(data)
     
 class GenerateOpenAIResponse(APIView):
 
@@ -49,12 +54,35 @@ class TestToken(APIView):
 
 class GetDocumentsByUser(APIView):
 
-    def get(self, request):
+    permission_classes = [permissions.IsAuthenticated]
 
+    def get(self, request):
         user_instance = request.user
         docType = request.query_params.get('type')
 
         queryset = models.Document.objects.filter(user=user_instance, type=docType)
         serializer = serializers.DocumentThumbnailSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+class CreateDocumentByUser(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user_instance = request.user
+        docType = request.query_params.get('type')
+        body = request.data
+
+        new_document = models.Document.objects.create(
+            user=user_instance, 
+            type=docType, 
+            videoID=body['videoID'], 
+            title=body['title'], 
+            description=body['description'], 
+            content=body['content'])
+        
+        new_document.save()
+        serializer = serializers.DocumentThumbnailSerializer(new_document, many=True)
 
         return Response(serializer.data)

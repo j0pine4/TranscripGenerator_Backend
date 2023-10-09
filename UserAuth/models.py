@@ -3,6 +3,8 @@ from rest_framework import authentication
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from enum import Enum
 
+from . import services
+
 """
 User Auth Models
 """
@@ -28,6 +30,11 @@ class UserManager(BaseUserManager):
         
         user = self.model(email=self.normalize_email(email), **extra_fields)
         user.set_password(password)
+
+        # Generate stripe customer ID
+        customer = services.createNewCustomer(user)
+        user.stripeCustomerID = customer.id
+
         user.save(using=self._db)
 
         return user
@@ -63,6 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     subscription_tier = models.CharField(choices=SUBSCRIPTION_TIERS, default='FREE')
+    stripeCustomerID = models.CharField(max_length=255, blank=True, null=True)
 
     objects = UserManager()
 
