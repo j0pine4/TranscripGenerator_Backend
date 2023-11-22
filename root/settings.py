@@ -30,8 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000',]
-
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -147,12 +146,18 @@ AUTH_USER_MODEL = 'UserAuth.User'
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     "TOKEN_OBTAIN_SERIALIZER": "UserAuth.serializers.MyTokenObtainPairSerializer",
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
+    # "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),
+    # "REFRESH_TOKEN_LIFETIME": timedelta(seconds=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_NAME": "access_token",
+    "REFRESH_TOKEN_NAME": "refresh_token",
+    "JWT_COOKIE_SAMESITE": "Lax",
 }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'UserAuth.authenticate.JWTCookieAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }

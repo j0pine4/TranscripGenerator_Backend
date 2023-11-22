@@ -5,6 +5,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = [
+            'id',
             'user',
             'videoID',
             'title',
@@ -19,8 +20,15 @@ class DocumentThumbnailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = [
+            'id',
             'videoID',
             'title',
             'description',
             'created_on',
         ]
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Message
+        fields = "__all__"
+

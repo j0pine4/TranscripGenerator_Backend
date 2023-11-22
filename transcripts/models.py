@@ -24,3 +24,30 @@ class Document(models.Model):
     def __str__(self):
         return self.title
 
+class Conversation(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    videoID = models.CharField(max_length=150)
+    created_at = models.DateTimeField(auto_created=True, auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+class Message(models.Model):
+    SYS = 'system'
+    ASS = 'assistant'
+    USR = 'user'
+
+    ROLE_TYPES = (
+        (SYS, 'system'),
+        (ASS, 'assistant'),
+        (USR, 'user'),
+    )
+    
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='conversation_messages')
+    role = models.CharField(max_length=150, choices=ROLE_TYPES)
+    content = models.CharField()
+    created_at = models.DateTimeField(auto_created=True, auto_now=True)
+
+    def __str__(self):
+        return self.conversation.title
