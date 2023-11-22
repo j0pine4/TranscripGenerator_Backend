@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://transcripgeneratorbackend-production.up.railway.app/',]
+CSRF_TRUSTED_ORIGINS = ['https://transcripgeneratorbackend-production.up.railway.app',]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
