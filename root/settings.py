@@ -144,6 +144,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'UserAuth.User'
 
+# TODO: Make sure the samesite is set to strict once domain is determined
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     "TOKEN_OBTAIN_SERIALIZER": "UserAuth.serializers.MyTokenObtainPairSerializer",
@@ -153,7 +154,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ACCESS_TOKEN_NAME": "access_token",
     "REFRESH_TOKEN_NAME": "refresh_token",
-    "JWT_COOKIE_SAMESITE": "Lax",
+    "JWT_COOKIE_SAMESITE": "None",
 }
 
 REST_FRAMEWORK = {
