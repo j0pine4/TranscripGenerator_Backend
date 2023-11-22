@@ -154,7 +154,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ACCESS_TOKEN_NAME": "access_token",
     "REFRESH_TOKEN_NAME": "refresh_token",
-    "JWT_COOKIE_SAMESITE": "None",
+    "JWT_COOKIE_SAMESITE": "Lax",
 }
 
 REST_FRAMEWORK = {

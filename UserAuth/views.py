@@ -34,7 +34,8 @@ class JWTSetCookieMixin:
                 settings.SIMPLE_JWT["REFRESH_TOKEN_NAME"],
                 response.data.get("refresh"),
                 httponly=True,
-                samesite=settings.SIMPLE_JWT["JWT_COOKIE_SAMESITE"]
+                samesite=settings.SIMPLE_JWT["JWT_COOKIE_SAMESITE"],
+                
             )
             
         # Access Token
