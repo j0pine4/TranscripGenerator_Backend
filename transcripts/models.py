@@ -2,6 +2,13 @@ from django.db import models
 from django.conf import settings
 
 # Create your models here.
+class MessageTest(models.Model):
+    body = models.CharField(max_length=150)
+    supabaseID = models.CharField(max_length=150, blank=True)
+
+    def __str__(self):
+        return self.body
+
 class Document(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     videoID = models.CharField(max_length=150)

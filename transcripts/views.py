@@ -43,7 +43,7 @@ class GenerateOpenAIResponse(APIView):
 
         # try:
             openai.api_key = os.environ.get('OPENAI_SECRET_KEY')
-            body = request.data['query'] + 'Lets think step by step \n\n output: '
+            body = request.data['query'] + 'Lets think step by step \n\n html: '
 
             chat_completion = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo-1106", 
@@ -220,3 +220,14 @@ class SetCookieView(APIView):
         response = Response("Cookie set successfully")
         response.set_cookie(key='my_cookie_name', value='cookie_value', httponly=True)
         return response
+    
+class CreateTestMessage(APIView):
+
+    def post(self, request, *args, **kwargs):
+        body = request.data
+
+        newMessage = models.MessageTest.objects.create(
+            body=body['message']
+        )
+
+        return Response("Message Created")

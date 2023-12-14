@@ -12,4 +12,5 @@ urlpatterns = [
     path('conversations/<int:id>/', views.GetConversationMessages.as_view(), name='getConversation'),
     path('conversations/<int:id>/messages/', views.GetConversationMessages.as_view(), name='getMessages'),
     path('conversations/<int:id>/messages/create/', views.CreateNewMessage.as_view(), name='createMessage'),
+    path('message/create/', views.CreateTestMessage.as_view(), name='createTestMessage'),
 ]

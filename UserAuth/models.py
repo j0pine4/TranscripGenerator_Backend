@@ -64,6 +64,7 @@ class SUBSCRIPTION_TIERS_ENUM(Enum):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """ User in the System """
+    supabaseID = models.CharField(max_length=255, blank=True, default="")
     email = models.EmailField(max_length=266, unique=True)
     firstName = models.CharField(max_length=255)
     lastName = models.CharField(max_length=255)

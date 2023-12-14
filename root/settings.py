@@ -159,7 +159,7 @@ SIMPLE_JWT = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'UserAuth.authenticate.JWTCookieAuthentication',
+        'UserAuth.authentication.SupabaseAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
