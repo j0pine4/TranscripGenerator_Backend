@@ -3,10 +3,9 @@ import os
 from rest_framework import authentication, exceptions
 from .exceptions import InvalidAuthToken
 from django.contrib.auth import get_user_model
-from . import models
 from django.conf import settings
 from supabase import create_client, Client
-import pprint
+from . import services
 
 SUPABASE_URL = os.environ.get('SUPABASE_URL')
 SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY')
@@ -23,7 +22,6 @@ class SupabaseAuthentication(authentication.BaseAuthentication):
         try:
             auth = supabase.auth.get_user(token) 
             user_id = auth.user.id
-            pprint.pprint(auth)
         except Exception:
             raise InvalidAuthToken("Invalid auth token")
 
@@ -32,8 +30,15 @@ class SupabaseAuthentication(authentication.BaseAuthentication):
         except:
             user = get_user_model().objects.create(
                 supabaseID=user_id, 
-                firstName="test", 
-                lastName="user", 
+                email=auth.user.email,
+                firstName=auth.user.user_metadata['firstName'], 
+                lastName=auth.user.user_metadata['lastName'], 
                 )
+            
+            # Generate stripe customer ID
+            customer = services.createNewCustomer(user)
+            user.stripeCustomerID = customer.id
+
+            user.save()
 
         return (user, None)
