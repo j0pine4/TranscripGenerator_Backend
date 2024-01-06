@@ -31,7 +31,7 @@ class Generator_Throttle(UserRateThrottle):
 
         if user.is_authenticated:
             if user.subscription_tier == SUBSCRIPTION_TIERS_ENUM.FREE.value:
-                self.rate = '5/day'
+                self.rate = '10/day'
             elif user.subscription_tier == SUBSCRIPTION_TIERS_ENUM.PREMIUM.value:
                 self.rate = '15/day'
             elif user.subscription_tier == SUBSCRIPTION_TIERS_ENUM.ENHANCED.value:

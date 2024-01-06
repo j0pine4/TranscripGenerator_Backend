@@ -16,7 +16,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from transcripts.views import SetCookieView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,5 +24,4 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls.jwt')),
     path('api/user/', include('UserAuth.urls')),
     path('api/transcripts/', include('transcripts.urls')),
-    path('set-cookie/', SetCookieView.as_view(), name='set-cookie'),
 ]

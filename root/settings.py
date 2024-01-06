@@ -144,7 +144,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'UserAuth.User'
 
-# TODO: Make sure the samesite is set to strict once domain is determined
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     "TOKEN_OBTAIN_SERIALIZER": "UserAuth.serializers.MyTokenObtainPairSerializer",
@@ -162,4 +161,8 @@ REST_FRAMEWORK = {
         'UserAuth.authentication.SupabaseAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',
+        'user': '10/minute'
+    }
 }

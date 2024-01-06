@@ -13,7 +13,7 @@ class Document(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     videoID = models.CharField(max_length=150)
     title = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, blank=True, null=True, default="")
     content = models.TextField()
 
     TRAN = 'TRANSCRIPT'
@@ -58,3 +58,12 @@ class Message(models.Model):
 
     def __str__(self):
         return self.conversation.title
+    
+class DailyTokenCount(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_on = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    token_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user} - {self.created_on}"

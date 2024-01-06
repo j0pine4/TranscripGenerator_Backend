@@ -3,10 +3,10 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from . import services, throttles
+from . import services
+from googleapiclient.discovery import build
 import openai
 import os
-from UserAuth.authenticate import JWTCookieAuthentication
 
 from . import models
 from . import serializers
@@ -14,7 +14,6 @@ from . import serializers
 class TranscriptBuilderViewset(APIView):
 
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [throttles.Transcript_Throttle]
 
     def get(self, request, *args, **kwargs):
 
@@ -23,10 +22,17 @@ class TranscriptBuilderViewset(APIView):
         try:
             transcript = services.getVideoTranscript(video_id)
             tokens = services.countTokens(transcript)
+            token_counter_instance = services.token_counter_check(request)
+            
+            token_check = services.userTokenCheck(request, tokens, token_counter_instance)
 
             data = {
                 'transcript': transcript,
-                'allowed': services.userTokenCheck(request, tokens)
+                'allowed': token_check['allowed'],
+                'token_limit': token_check['token_limit'],
+                'new_transcript_token_amount': token_check['new_transcript_token_amount'],
+                'tokensUsed': token_check['current_tokens'],
+                'tokensLeft': token_check['remaining_tokens'],
             }
 
             return Response(data)
@@ -37,15 +43,29 @@ class TranscriptBuilderViewset(APIView):
 class GenerateOpenAIResponse(APIView):
 
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [throttles.Generator_Throttle]
 
     def post(self, request, *args, **kwargs):
 
-        # try:
+        try:
+
+            # Fetch the users daily token count and how many tokens this transcript uses
+            user_instance = request.user
+            daily_token_counter = models.DailyTokenCount.objects.filter(user=user_instance).latest('id')
+            transcript_token_amount = request.data['transcript_token_amount']
+
+            # Ensure that the incoming tokens are within the user limit
+            token_check = services.userTokenCheck(request, transcript_token_amount, daily_token_counter)
+            if token_check['allowed'] == False:
+                return Response('This user does not have enough tokens for this transcript', status=status.HTTP_400_BAD_REQUEST)
+            
+            # Add to the counter and save
+            daily_token_counter.token_count += transcript_token_amount
+            daily_token_counter.save()
+
             openai.api_key = os.environ.get('OPENAI_SECRET_KEY')
             body = request.data['query'] + 'Lets think step by step \n\n html: '
 
-            chat_completion = openai.ChatCompletion.create(
+            chat_completion = openai.chat.completions.create(
                 model="gpt-3.5-turbo-1106", 
                 temperature=0.5,
                 messages=[
@@ -57,8 +77,8 @@ class GenerateOpenAIResponse(APIView):
 
             return Response(output)
     
-        # except:
-        #     return Response("Error occured while generating notes for this transcript", status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response("Error occured while generating notes for this transcript", status=status.HTTP_400_BAD_REQUEST)
     
 
 class CreateConversation(APIView):
@@ -212,15 +232,6 @@ class CreateDocumentByUser(APIView):
 
         return Response(serializer.data)
 
-class SetCookieView(APIView):
-    def get(self, request):
-
-        print(request.COOKIES)
-        
-        response = Response("Cookie set successfully")
-        response.set_cookie(key='my_cookie_name', value='cookie_value', httponly=True)
-        return response
-    
 class CreateTestMessage(APIView):
 
     def post(self, request, *args, **kwargs):
@@ -231,3 +242,43 @@ class CreateTestMessage(APIView):
         )
 
         return Response("Message Created")
+    
+class YoutubeSearchViewset(APIView):
+
+    YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
+
+    def post(self, request):
+        body = request.data
+        query = body['query']
+
+        # Creat the service for the youtube api
+        youtube = build('youtube', 'v3', developerKey=self.YOUTUBE_API_KEY)
+
+        # Search youtube for videos matching this query
+        request = youtube.search().list(part='snippet', q=body, maxResults=20, pageToken="CBQQAA")
+
+        response = request.execute()
+        youtube.close()
+
+        return Response(response)
+
+class AssistantViewset(APIView):
+
+    openai.api_key = os.environ.get('OPENAI_SECRET_KEY')
+
+    def get(self, request):
+
+        assistant = openai.beta.assistants.create(
+            name="Math Tutor",
+            instructions="You are a personal math tutor. Write and run code to answer math questions.",
+            tools=[{"type": "code_interpreter"}],
+            model="gpt-3.5-turbo-1106", 
+        )
+
+        # Create our thread
+
+class TokenCounterTest(APIView):
+
+    def get(self, request):
+
+        return Response(services.token_counter_check(request))
